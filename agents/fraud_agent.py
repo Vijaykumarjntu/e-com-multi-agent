@@ -18,7 +18,7 @@ class PaymentsFraudAgent:
     def process(self, state):
         customer_id = state['customer_id']
         amount = state['total_amount']
-        quantity = sum(item['quantity'] for item in state['items'])
+        quantity = sum(item['Quantity'] for item in state['items'])
         
         # Use ML for fraud detection
         fraud_prob = self.model.predict(customer_id, amount, quantity)

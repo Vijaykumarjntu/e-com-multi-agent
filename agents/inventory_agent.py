@@ -1,19 +1,34 @@
 import pandas as pd
 from typing import Dict, Any
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from models.inventory_model import InventoryForecastModel
+
 class InventoryForecaster:
-    def __init__(self, data: pd.DataFrame):
+    def __init__(self, data):
         self.data = data
+        self.forecast_model = InventoryForecastModel()
         
-    def process(self, state: Dict[str, Any]) -> Dict[str, Any]:
+    def process(self, state):
         items = state['items']
-        stock_status = {}
+        alerts = []
         
         for item in items:
-            stock_code = item['StockCode']
-            # Check historical sales
-            sales = self.data[self.data['StockCode'] == stock_code]['Quantity'].sum()
-            stock_status[stock_code] = max(0, 100 - sales)  # Mock stock level
+            StockCode = item['StockCode']
+            forecast = self.forecast_model.forecast_stock(StockCode)
             
-        state['inventory_status'] = stock_status
+            if forecast['reorder_needed']:
+                alerts.append(f"⚠️ {StockCode}: Only {forecast['current_stock']} left, reorder needed")
+            elif forecast['will_stockout']:
+                alerts.append(f"📦 {StockCode}: Will sell out in 7 days")
+        
+        if alerts:
+            print("\n🔮 INVENTORY ALERTS:")
+            for alert in alerts:
+                print(f"  {alert}")
+        
+        state['inventory_alerts'] = alerts
         return state

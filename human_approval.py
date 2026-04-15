@@ -11,6 +11,7 @@ from orchestration.graph import ECommerceOrchestrator
 
 # Load data
 df = pd.read_csv('online_retail.csv', encoding='latin1')
+df['TotalPrice'] = df['Quantity'] * df['UnitPrice']
 
 # Create order that WILL trigger human approval (high amount = high fraud risk)
 test_order_high_risk = {
